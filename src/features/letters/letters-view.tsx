@@ -5,6 +5,9 @@ import { LetterTypeSelector } from './components/letter-type-selector';
 import { LetterInfoForm } from './components/letter-info-form';
 import { AccountsSelection } from './components/accounts-selection';
 import { LetterPreview } from './components/letter-preview';
+import { Card, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2 } from 'lucide-react';
 /*
  * FILE: letters-view.tsx
  * PURPOSE: This is the main "Container" or "Orchestrator" component for the entire Letter Creation Wizard.
@@ -17,6 +20,7 @@ import { LetterPreview } from './components/letter-preview';
 export const LettersView: React.FC = () => {
   const {
     currentStep,
+    highestStep,
     letterType,
     formData,
     selectedAccounts,
@@ -25,6 +29,7 @@ export const LettersView: React.FC = () => {
     handleToggleAccount,
     handleNext,
     handleBack,
+    jumpToStep,
     submitLetter,
     resetWizard,
   } = useLetters();
@@ -37,39 +42,20 @@ export const LettersView: React.FC = () => {
   ];
 
   return (
-    <div className="wizard-page">
-      <div className="wizard-container">
+    <div className="min-h-screen bg-slate-50 text-slate-900 px-6 py-10 flex justify-center">
+      <div className="w-full max-w-[1040px] flex flex-col gap-6">
         
-        {/* Back Link */}
-        <a 
-          href="#" 
-          className="back-button"
-          onClick={(e) => {
-            e.preventDefault();
-            if (currentStep > 1 && currentStep < 5) {
-              handleBack();
-            }
-          }}
-          style={{ visibility: currentStep === 1 || currentStep === 5 ? 'hidden' : 'visible' }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-          Previous Step
-        </a>
-
         {/* Header */}
         {currentStep < 5 && (
-          <div className="wizard-header">
-            <h1 className="wizard-title">Create Letter</h1>
-            <p className="wizard-description">Follow the steps to create and submit a new corporate letter</p>
+          <div className="mb-2">
+            <h1 className="text-[1.75rem] font-bold text-slate-900 tracking-tight mb-1.5">Create Letter</h1>
+            <p className="text-[0.925rem] text-slate-500">Follow the steps to create and submit a new corporate letter</p>
           </div>
         )}
 
         {/* Stepper */}
         {currentStep < 5 && (
-          <StepIndicator currentStep={currentStep} steps={steps} />
+          <StepIndicator currentStep={currentStep} highestStep={highestStep} steps={steps} onStepClick={jumpToStep} />
         )}
 
         {/* Step Content routing */}
@@ -84,9 +70,11 @@ export const LettersView: React.FC = () => {
 
         {currentStep === 2 && (
           <LetterInfoForm
+            letterType={letterType}
             formData={formData}
             onChange={handleUpdateFormData}
             onNext={handleNext}
+            onBack={handleBack}
           />
         )}
 
@@ -113,33 +101,22 @@ export const LettersView: React.FC = () => {
 
         {/* Step 5: Success screen */}
         {currentStep === 5 && (
-          <div className="wizard-card animated-step" style={{ textAlign: 'center', padding: '60px 40px' }}>
-            <div style={{ 
-              width: '72px', 
-              height: '72px', 
-              borderRadius: '50%', 
-              backgroundColor: '#ecfdf5', 
-              color: '#10b981', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              margin: '0 auto 24px',
-              border: '2px solid #a7f3d0'
-            }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <h2 className="wizard-card-title" style={{ fontSize: '1.6rem' }}>Letter Created Successfully!</h2>
-            <p className="wizard-card-subtitle" style={{ maxWidth: '400px', margin: '8px auto 32px' }}>
-              The corporate letter under reference branch <strong>"{formData.br}"</strong> has been generated and queued for approval.
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-              <button className="btn-primary" onClick={resetWizard}>
-                Create Another Letter
-              </button>
-            </div>
-          </div>
+          <Card className="animated-step border-none shadow-sm">
+            <CardContent className="flex flex-col items-center justify-center py-[60px] px-10 text-center">
+              <div className="w-[72px] h-[72px] rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-6 border-2 border-emerald-200">
+                <CheckCircle2 className="w-9 h-9" strokeWidth={2.5} />
+              </div>
+              <CardTitle className="text-[1.6rem] mb-2 text-slate-900">Letter Created Successfully!</CardTitle>
+              <CardDescription className="max-w-[400px] mb-8 text-base">
+                The corporate letter under reference branch <strong className="text-slate-700 font-semibold">"{formData.br}"</strong> has been generated and queued for approval.
+              </CardDescription>
+              <div className="flex justify-center gap-3">
+                <Button onClick={resetWizard}>
+                  Create Another Letter
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
       </div>

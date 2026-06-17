@@ -2,6 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { createLetterSchema } from '../schemas/letter-schema';
 import type { CreateLetterFormData } from '../schemas/letter-schema';
 import { ZodError } from 'zod';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { Printer } from 'lucide-react';
 
 interface LetterPreviewProps {
   letterType: 'with-facility' | 'without-facility';
@@ -18,7 +40,6 @@ const ACCOUNT_OPTIONS = [
 ];
 
 const REVIEWING_OFFICERS = [
-  { value: '', label: '-- Select Officer --' },
   { value: 'officer1', label: 'Mr. K. Rajapaksha – Senior Manager' },
   { value: 'officer2', label: 'Ms. P. Fernando – Branch Manager' },
   { value: 'officer3', label: 'Mr. S. Wickramasinghe – Operations Head' },
@@ -26,63 +47,43 @@ const REVIEWING_OFFICERS = [
 
 /* ─── Letter Preview Modal ──────────────────────────── */
 interface PreviewModalProps {
+  isOpen: boolean;
   onClose: () => void;
   /** TODO: Pass the Jasper report URL here once backend is connected */
   jasperUrl?: string;
 }
 
 const PreviewModal: React.FC<PreviewModalProps> = ({
+  isOpen,
   onClose,
   jasperUrl,
 }) => {
   return (
-    <div className="preview-modal-overlay" onClick={onClose}>
-      <div
-        className="preview-modal-box"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="preview-modal-header">
-          <span>Letter Preview</span>
-          <button className="preview-modal-close" onClick={onClose}>✕</button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[720px] max-h-[90vh] p-0 overflow-hidden flex flex-col gap-0 border-none shadow-2xl">
+        <DialogHeader className="bg-gradient-to-r from-[#2b3b7e] to-[#4a5da6] p-4 text-white">
+          <DialogTitle className="text-white">Letter Preview</DialogTitle>
+        </DialogHeader>
 
-        <div className="preview-modal-body">
+        <div className="flex-1 overflow-y-auto p-7 px-8 bg-slate-50 min-h-[400px] flex flex-col items-center justify-center">
           {jasperUrl ? (
             /* Once backend is connected, render Jasper report in an iframe */
             <iframe
               src={jasperUrl}
               title="Jasper Report Preview"
-              style={{ width: '100%', height: '100%', border: 'none', minHeight: '600px' }}
+              className="w-full h-full border-none min-h-[600px]"
             />
           ) : (
             /* Loading state — waiting for Jasper report URL */
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '80px 40px',
-              minHeight: '400px',
-              gap: '24px',
-            }}>
+            <div className="flex flex-col items-center justify-center py-20 px-10 min-h-[400px] gap-6">
               {/* Spinner */}
-              <div className="preview-spinner" />
+              <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-[spin_0.8s_linear_infinite]" />
 
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: '#334155',
-                  marginBottom: '8px',
-                }}>
+              <div className="text-center">
+                <div className="text-[1.1rem] font-semibold text-slate-700 mb-2">
                   Generating Letter Preview…
                 </div>
-                <div style={{
-                  fontSize: '0.85rem',
-                  color: '#94a3b8',
-                  maxWidth: '340px',
-                  lineHeight: 1.5,
-                }}>
+                <div className="text-[0.85rem] text-slate-400 max-w-[340px] leading-relaxed">
                   Connecting to the report server. The Jasper report will render here once the backend is integrated.
                 </div>
               </div>
@@ -90,18 +91,17 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
           )}
         </div>
 
-        <div className="preview-modal-footer">
-          <button className="btn-secondary" onClick={onClose}>Close</button>
-          <button className="btn-primary" disabled={!jasperUrl}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-              <rect x="6" y="14" width="12" height="8"/>
-            </svg>
+        <DialogFooter className="bg-white p-3.5 px-6 border-t border-slate-200 sm:justify-end gap-2">
+          <DialogClose asChild>
+            <Button variant="outline">Close</Button>
+          </DialogClose>
+          <Button disabled={!jasperUrl}>
+            <Printer className="mr-2 h-4 w-4" />
             Print / Save PDF
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -189,21 +189,27 @@ export const LetterPreview: React.FC<LetterPreviewProps> = ({
 
   return (
     <>
-      {showPreview && (
-        <PreviewModal
-          onClose={() => setShowPreview(false)}
-        />
-      )}
+      <PreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+      />
 
-      <div className="wizard-card animated-step" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="dds-header">Data Entering Screen</div>
+      <Card className="animated-step overflow-hidden p-0">
+        <div className="bg-gradient-to-r from-[#2b3b7e] to-[#4a5da6] text-white py-3 px-6 text-xl font-semibold text-center">
+          Data Entering Screen
+        </div>
 
-        <div style={{ padding: '28px 40px 32px' }}>
+        <div className="p-7 px-10 pb-8">
 
           {/* ══ Customer Charges Credit ══ */}
-          <div className="des-section">
-            <div className="des-section-title">Customer Charges Credit</div>
-            <div className="des-radio-row">
+          <div className="mb-7">
+            <h3 className="text-[0.95rem] font-bold text-slate-900 mb-3">Customer Charges Credit</h3>
+            
+            <RadioGroup
+              value={formData.chargesMode}
+              onValueChange={(val: any) => handleChangeField('chargesMode', val)}
+              className="flex items-center gap-7 mb-3.5"
+            >
               {(
                 [
                   ['debit', 'Debit from Selected Account'],
@@ -211,66 +217,78 @@ export const LetterPreview: React.FC<LetterPreviewProps> = ({
                   ['manual', 'To Be Collected Manually'],
                 ] as const
               ).map(([val, label]) => (
-                <label key={val} className="des-radio-label">
-                  <input
-                    type="radio"
-                    name="chargesMode"
-                    value={val}
-                    checked={formData.chargesMode === val}
-                    onChange={() => handleChangeField('chargesMode', val)}
-                    className="des-radio"
-                  />
-                  {label}
-                </label>
+                <div key={val} className="flex items-center space-x-2">
+                  <RadioGroupItem value={val} id={`charges-${val}`} className="border-slate-400 text-blue-900 data-[state=checked]:border-blue-900" />
+                  <Label htmlFor={`charges-${val}`} className="text-[0.875rem] text-slate-700 font-normal cursor-pointer select-none">
+                    {label}
+                  </Label>
+                </div>
               ))}
-            </div>
+            </RadioGroup>
 
-            <div className="des-field-grid">
-              <div className="des-field-row">
-                <span className="des-field-label">Account Numbers</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <select
-                    className={`des-select ${errors.chargeAccount ? 'error-border' : ''}`}
-                    value={formData.chargeAccount || ''}
-                    onChange={(e) => handleChangeField('chargeAccount', e.target.value)}
-                    onBlur={() => handleBlur('chargeAccount')}
-                    disabled={formData.chargesMode !== 'debit'}
-                  >
-                    {ACCOUNT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Account Numbers</span>
+                <div className="flex-1 flex items-center">
+                  <div className="w-[200px]">
+                    <Select
+                      value={formData.chargeAccount}
+                      onValueChange={(val) => handleChangeField('chargeAccount', val)}
+                      disabled={formData.chargesMode !== 'debit'}
+                    >
+                      <SelectTrigger 
+                        error={!!errors.chargeAccount}
+                        className={cn(
+                          "h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus:ring-primary/20",
+                          formData.chargesMode !== 'debit' && "bg-slate-50 text-slate-400"
+                        )}
+                        onBlur={() => handleBlur('chargeAccount')}
+                      >
+                        <SelectValue placeholder="Select Account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACCOUNT_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {formData.chargesMode === 'debit' && (
-                    <span className="des-balance-badge">
+                    <span className="ml-3.5 text-[0.845rem] font-semibold text-blue-900">
                       Available Balance: {currentBalance}
                     </span>
                   )}
-                  {errors.chargeAccount && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: '8px' }}>{errors.chargeAccount}</span>}
+                  {errors.chargeAccount && <span className="text-red-500 text-xs ml-2">{errors.chargeAccount}</span>}
                 </div>
               </div>
 
-              <div className="des-field-row">
-                <span className="des-field-label">Charges</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <input
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Charges</span>
+                <div className="flex-1 flex items-center">
+                  <Input
                     type="text"
-                    className={`des-input ${errors.charges ? 'error-border' : ''}`}
-                    style={{ width: '160px', flex: 'none' }}
+                    error={!!errors.charges}
+                    className="w-[160px] h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus-visible:ring-primary/20 disabled:bg-slate-50 disabled:text-slate-400"
                     value={formData.charges || ''}
                     onChange={(e) => handleChangeField('charges', e.target.value)}
                     onBlur={() => handleBlur('charges')}
                     disabled={formData.chargesMode === 'not-applicable'}
                   />
-                  {errors.charges && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: '8px' }}>{errors.charges}</span>}
+                  {errors.charges && <span className="text-red-500 text-xs ml-2">{errors.charges}</span>}
                 </div>
               </div>
             </div>
           </div>
 
           {/* ══ Receipt Details ══ */}
-          <div className="des-section">
-            <div className="des-section-title">Receipt Details</div>
-            <div className="des-radio-row">
+          <div className="mb-7">
+            <h3 className="text-[0.95rem] font-bold text-slate-900 mb-3">Receipt Details</h3>
+            
+            <RadioGroup
+              value={formData.receiptMode}
+              onValueChange={(val: any) => handleChangeField('receiptMode', val)}
+              className="flex items-center gap-7 mb-3.5"
+            >
               {(
                 [
                   ['customer', 'Customer'],
@@ -278,66 +296,64 @@ export const LetterPreview: React.FC<LetterPreviewProps> = ({
                   ['from-list', 'From List'],
                 ] as const
               ).map(([val, label]) => (
-                <label key={val} className="des-radio-label">
-                  <input
-                    type="radio"
-                    name="receiptMode"
-                    value={val}
-                    checked={formData.receiptMode === val}
-                    onChange={() => handleChangeField('receiptMode', val)}
-                    className="des-radio"
-                  />
-                  {label}
-                </label>
+                <div key={val} className="flex items-center space-x-2">
+                  <RadioGroupItem value={val} id={`receipt-${val}`} className="border-slate-400 text-blue-900 data-[state=checked]:border-blue-900" />
+                  <Label htmlFor={`receipt-${val}`} className="text-[0.875rem] text-slate-700 font-normal cursor-pointer select-none">
+                    {label}
+                  </Label>
+                </div>
               ))}
-            </div>
+            </RadioGroup>
 
-            <div className="des-field-grid">
-              <div className="des-field-row">
-                <span className="des-field-label">Customer Name</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <input
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Customer Name</span>
+                <div className="flex-1 flex items-center">
+                  <Input
                     type="text"
-                    className={`des-input ${errors.customerName ? 'error-border' : ''}`}
+                    error={!!errors.customerName}
+                    className="max-w-[320px] h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus-visible:ring-primary/20"
                     value={formData.customerName || ''}
                     onChange={(e) => handleChangeField('customerName', e.target.value)}
                     onBlur={() => handleBlur('customerName')}
                   />
-                  {errors.customerName && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: '8px' }}>{errors.customerName}</span>}
+                  {errors.customerName && <span className="text-red-500 text-xs ml-2">{errors.customerName}</span>}
                 </div>
               </div>
-              <div className="des-field-row">
-                <span className="des-field-label">Customer Address</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <input
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Customer Address</span>
+                <div className="flex-1 flex items-center">
+                  <Input
                     type="text"
-                    className={`des-input ${errors.customerAddress ? 'error-border' : ''}`}
+                    error={!!errors.customerAddress}
+                    className="max-w-[320px] h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus-visible:ring-primary/20"
                     value={formData.customerAddress || ''}
                     onChange={(e) => handleChangeField('customerAddress', e.target.value)}
                     onBlur={() => handleBlur('customerAddress')}
                   />
-                  {errors.customerAddress && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: '8px' }}>{errors.customerAddress}</span>}
+                  {errors.customerAddress && <span className="text-red-500 text-xs ml-2">{errors.customerAddress}</span>}
                 </div>
               </div>
-              <div className="des-field-row">
-                <span className="des-field-label">Recipients</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <input
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Recipients</span>
+                <div className="flex-1 flex items-center">
+                  <Input
                     type="text"
-                    className={`des-input ${errors.recipients ? 'error-border' : ''}`}
+                    error={!!errors.recipients}
+                    className="max-w-[320px] h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus-visible:ring-primary/20"
                     value={formData.recipients || ''}
                     onChange={(e) => handleChangeField('recipients', e.target.value)}
                     onBlur={() => handleBlur('recipients')}
                   />
-                  {errors.recipients && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: '8px' }}>{errors.recipients}</span>}
+                  {errors.recipients && <span className="text-red-500 text-xs ml-2">{errors.recipients}</span>}
                 </div>
               </div>
-              <div className="des-field-row">
-                <span className="des-field-label">Additional Text</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <input
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Additional Text</span>
+                <div className="flex-1 flex items-center">
+                  <Input
                     type="text"
-                    className="des-input"
+                    className="max-w-[320px] h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus-visible:ring-primary/20"
                     value={formData.additionalText || ''}
                     onChange={(e) => handleChangeField('additionalText', e.target.value)}
                   />
@@ -347,51 +363,62 @@ export const LetterPreview: React.FC<LetterPreviewProps> = ({
           </div>
 
           {/* ══ Approval Details ══ */}
-          <div className="des-section">
-            <div className="des-section-title">Approval Details</div>
-            <div className="des-field-grid">
-              <div className="des-field-row">
-                <span className="des-field-label">Reviewing Officer</span>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                  <select
-                    className={`des-select ${errors.reviewingOfficer ? 'error-border' : ''}`}
-                    value={formData.reviewingOfficer || ''}
-                    onChange={(e) => handleChangeField('reviewingOfficer', e.target.value)}
-                    onBlur={() => handleBlur('reviewingOfficer')}
-                  >
-                    {REVIEWING_OFFICERS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  {errors.reviewingOfficer && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: '8px' }}>{errors.reviewingOfficer}</span>}
+          <div className="mb-7">
+            <h3 className="text-[0.95rem] font-bold text-slate-900 mb-3">Approval Details</h3>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-0">
+                <span className="min-w-[160px] py-[7px] px-3 bg-slate-100 border border-slate-300 border-r-0 text-[0.845rem] font-semibold text-slate-700 whitespace-nowrap">Reviewing Officer</span>
+                <div className="flex-1 flex items-center">
+                  <div className="w-[320px]">
+                    <Select
+                      value={formData.reviewingOfficer}
+                      onValueChange={(val) => handleChangeField('reviewingOfficer', val)}
+                    >
+                      <SelectTrigger 
+                        error={!!errors.reviewingOfficer}
+                        className="h-[36px] text-[0.845rem] rounded-none rounded-r-md border-slate-300 shadow-none focus:ring-primary/20"
+                        onBlur={() => handleBlur('reviewingOfficer')}
+                      >
+                        <SelectValue placeholder="-- Select Officer --" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REVIEWING_OFFICERS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {errors.reviewingOfficer && <span className="text-red-500 text-xs ml-2">{errors.reviewingOfficer}</span>}
                 </div>
               </div>
             </div>
           </div>
 
           {/* ══ Action Buttons ══ */}
-          <div className="des-btn-row">
-            <button className="des-btn des-btn-default" type="button" onClick={onBack}>
+          <div className="flex justify-between items-center gap-2.5 pt-4 border-t border-slate-100 mt-4 max-md:flex-col-reverse max-md:items-stretch">
+            <Button variant="outline" className="px-5.5 font-medium border-slate-300 text-slate-700 bg-slate-100 hover:bg-slate-200 hover:text-slate-900" onClick={onBack}>
               Previous
-            </button>
-            <button
-              className="des-btn des-btn-default"
-              type="button"
-              onClick={() => handleAction('submit')}
-            >
-              Submit
-            </button>
-            <button
-              className="des-btn des-btn-preview"
-              type="button"
-              onClick={() => handleAction('preview')}
-            >
-              Preview
-            </button>
+            </Button>
+            
+            <div className="flex gap-2.5 max-md:flex-col">
+              <Button
+                variant="outline"
+                className="px-5.5 font-medium border-slate-300 text-slate-700 bg-slate-100 hover:bg-slate-200 hover:text-slate-900"
+                onClick={() => handleAction('submit')}
+              >
+                Submit
+              </Button>
+              <Button
+                className="px-5.5 font-medium bg-[#2b3b7e] hover:bg-[#1e2d6b] text-white"
+                onClick={() => handleAction('preview')}
+              >
+                Preview
+              </Button>
+            </div>
           </div>
 
         </div>
-      </div>
+      </Card>
     </>
   );
 };

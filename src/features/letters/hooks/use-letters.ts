@@ -29,6 +29,7 @@ const initialFormData: CreateLetterFormData = {
 export const useLetters = () => {
   const [letters, setLetters] = useState<Letter[]>([]);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [highestStep, setHighestStep] = useState<number>(1);
   const [letterType, setLetterType] = useState<'with-facility' | 'without-facility' | null>(null);
   const [formData, setFormData] = useState<CreateLetterFormData>(initialFormData);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>(['checking', 'savings', 'loan']);
@@ -75,7 +76,11 @@ export const useLetters = () => {
   };
 
   const handleNext = () => {
-    setCurrentStep((prev) => prev + 1);
+    setCurrentStep((prev) => {
+      const next = prev + 1;
+      setHighestStep((h) => Math.max(h, next));
+      return next;
+    });
   };
 
   const handleBack = () => {
@@ -117,6 +122,7 @@ export const useLetters = () => {
 
   const resetWizard = () => {
     setCurrentStep(1);
+    setHighestStep(1);
     setLetterType(null);
     setFormData(initialFormData);
     setSelectedAccounts(['checking', 'savings', 'loan']);
@@ -125,6 +131,7 @@ export const useLetters = () => {
   return {
     letters,
     currentStep,
+    highestStep,
     letterType,
     formData,
     selectedAccounts,
@@ -133,6 +140,11 @@ export const useLetters = () => {
     handleToggleAccount,
     handleNext,
     handleBack,
+    jumpToStep: (step: number) => {
+      if (step <= highestStep) {
+        setCurrentStep(step);
+      }
+    },
     submitLetter,
     resetWizard,
   };

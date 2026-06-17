@@ -1,22 +1,23 @@
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 
 interface LetterStatusBadgeProps {
   status: 'draft' | 'pending' | 'approved' | 'rejected';
 }
 
 export const LetterStatusBadge: React.FC<LetterStatusBadgeProps> = ({ status }) => {
-  const getBadgeClass = () => {
+  const getVariant = () => {
     switch (status) {
-      case 'approved': return 'chip-success';
-      case 'pending': return 'chip-warning';
-      case 'rejected': return 'chip-danger';
-      default: return 'chip-default';
+      case 'approved': return 'success' as const;
+      case 'pending': return 'warning' as const;
+      case 'rejected': return 'destructive' as const;
+      default: return 'secondary' as const;
     }
   };
 
   return (
-    <span className={`chip ${getBadgeClass()}`} style={{ textTransform: 'capitalize' }}>
+    <Badge variant={getVariant()} className="capitalize">
       {status}
-    </span>
+    </Badge>
   );
 };

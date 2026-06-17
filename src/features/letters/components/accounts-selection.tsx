@@ -1,4 +1,16 @@
 import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface DepositAccount {
   id: string;
@@ -75,84 +87,87 @@ export const AccountsSelection: React.FC<AccountsSelectionProps> = ({
   );
 
   return (
-    <div className="wizard-card animated-step" style={{ padding: 0, overflow: 'hidden' }}>
+    <Card className="animated-step overflow-hidden p-0">
 
       {/* ── Purple gradient header ── */}
-      <div className="dds-header">
+      <div className="bg-gradient-to-r from-[#2b3b7e] to-[#4a5da6] text-white py-3 px-6 text-xl font-semibold text-center">
         Data Display Screen
       </div>
 
-      <div style={{ padding: '28px 32px 32px' }}>
+      <div className="p-7 px-8 pb-8">
 
         {/* ── Customer info block ── */}
-        <div className="dds-customer-grid">
-          <div className="dds-customer-row">
-            <span className="dds-customer-label">Customer CIF</span>
-            <span className="dds-customer-value">-</span>
+        <div className="grid grid-cols-1 gap-[1px] bg-slate-300 border border-slate-300 rounded max-w-[600px] mb-8">
+          <div className="flex bg-white">
+            <span className="w-[200px] py-2 px-4 bg-slate-100 font-semibold text-[0.85rem] text-slate-700 border-r border-slate-300 flex items-center">Customer CIF</span>
+            <span className="py-2 px-4 text-[0.85rem] text-slate-600 flex-1 flex items-center">-</span>
           </div>
-          <div className="dds-customer-row">
-            <span className="dds-customer-label">Customer Name</span>
-            <span className="dds-customer-value">-</span>
+          <div className="flex bg-white">
+            <span className="w-[200px] py-2 px-4 bg-slate-100 font-semibold text-[0.85rem] text-slate-700 border-r border-slate-300 flex items-center">Customer Name</span>
+            <span className="py-2 px-4 text-[0.85rem] text-slate-600 flex-1 flex items-center">-</span>
           </div>
-          <div className="dds-customer-row">
-            <span className="dds-customer-label">Customer BR</span>
-            <span className="dds-customer-value">-</span>
+          <div className="flex bg-white">
+            <span className="w-[200px] py-2 px-4 bg-slate-100 font-semibold text-[0.85rem] text-slate-700 border-r border-slate-300 flex items-center">Customer BR</span>
+            <span className="py-2 px-4 text-[0.85rem] text-slate-600 flex-1 flex items-center">-</span>
           </div>
-          <div className="dds-customer-row">
-            <span className="dds-customer-label">Customer Address</span>
-            <span className="dds-customer-value">-</span>
+          <div className="flex bg-white">
+            <span className="w-[200px] py-2 px-4 bg-slate-100 font-semibold text-[0.85rem] text-slate-700 border-r border-slate-300 flex items-center">Customer Address</span>
+            <span className="py-2 px-4 text-[0.85rem] text-slate-600 flex-1 flex items-center">-</span>
           </div>
         </div>
 
         {/* ══════════════════════════════════════════
             DEPOSIT ACCOUNTS
         ══════════════════════════════════════════ */}
-        <div className="dds-section">
-          <div className="dds-section-title">Deposit Accounts</div>
+        <div className="mb-9">
+          <div className="text-lg font-semibold text-slate-900 mb-3">Deposit Accounts</div>
 
-          <div className="dds-table-wrapper">
-            <table className="dds-table">
-              <thead>
-                <tr>
-                  <th>Type of Account</th>
-                  <th>Account No</th>
-                  <th>Currency Type</th>
-                  <th>Balance as at<br /><span className="dds-th-sub">DD/MM/YYYY</span></th>
-                  <th>Overdraft<br />Facility</th>
-                  <th>
+          <div className="overflow-x-auto border border-slate-200 rounded">
+            <Table className="text-[0.85rem]">
+              <TableHeader className="bg-slate-50">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Type of Account</TableHead>
+                  <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Account No</TableHead>
+                  <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Currency Type</TableHead>
+                  <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">
+                    Balance as at<br /><span className="text-xs font-normal text-slate-500 block mt-0.5">DD/MM/YYYY</span>
+                  </TableHead>
+                  <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Overdraft<br />Facility</TableHead>
+                  <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">
                     Overdraft Interest Charged<br />
-                    <span className="dds-th-sub">(From DD/MM/YYYY to DD/MM/YYYY)</span>
-                  </th>
-                  <th style={{ width: '36px' }}></th>
-                </tr>
-              </thead>
-              <tbody>
+                    <span className="text-xs font-normal text-slate-500 block mt-0.5">(From DD/MM/YYYY to DD/MM/YYYY)</span>
+                  </TableHead>
+                  <TableHead className="w-9" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {pagedDeposits.map((acc) => (
-                  <tr key={acc.id} className={selectedAccounts.includes(acc.id) ? 'dds-row-selected' : ''}>
-                    <td className="dds-td-link">{acc.typeOfAccount}</td>
-                    <td>{acc.accountNo}</td>
-                    <td>{acc.currencyType}</td>
-                    <td className="dds-td-num">{acc.balanceAsAt}</td>
-                    <td className="dds-td-num">{acc.overdraftFacility}</td>
-                    <td className="dds-td-num">{acc.overdraftInterestCharged}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <input
-                        type="checkbox"
-                        className="dds-checkbox"
-                        checked={selectedAccounts.includes(acc.id)}
-                        onChange={() => onToggleAccount(acc.id)}
-                      />
-                    </td>
-                  </tr>
+                  <TableRow key={acc.id} className={cn("hover:bg-slate-100 transition-colors", selectedAccounts.includes(acc.id) && "bg-blue-50")}>
+                    <TableCell className="text-sky-600 font-medium cursor-pointer hover:underline border-r border-slate-200">{acc.typeOfAccount}</TableCell>
+                    <TableCell className="border-r border-slate-200">{acc.accountNo}</TableCell>
+                    <TableCell className="border-r border-slate-200">{acc.currencyType}</TableCell>
+                    <TableCell className="text-right tabular-nums border-r border-slate-200">{acc.balanceAsAt}</TableCell>
+                    <TableCell className="text-right tabular-nums border-r border-slate-200">{acc.overdraftFacility}</TableCell>
+                    <TableCell className="text-right tabular-nums border-r border-slate-200">{acc.overdraftInterestCharged}</TableCell>
+                    <TableCell className="text-center p-0 align-middle">
+                      <div className="flex justify-center h-full items-center">
+                        <Checkbox
+                          checked={selectedAccounts.includes(acc.id)}
+                          onCheckedChange={() => onToggleAccount(acc.id)}
+                          className="data-[state=checked]:bg-[#2b3b7e] data-[state=checked]:border-[#2b3b7e]"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}
-          <div className="dds-pagination">
+          <div className="flex items-center justify-end gap-2 mt-3 pr-3">
             <button
-              className="dds-page-btn"
+              className="bg-transparent border-none p-1.5 text-[0.85rem] font-bold text-slate-600 cursor-pointer rounded-sm hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
               disabled={depositPage === 1}
               onClick={() => setDepositPage((p) => Math.max(1, p - 1))}
             >
@@ -161,14 +176,17 @@ export const AccountsSelection: React.FC<AccountsSelectionProps> = ({
             {Array.from({ length: totalDepositPages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p}
-                className={`dds-page-btn ${p === depositPage ? 'dds-page-btn-active' : ''}`}
+                className={cn(
+                  "bg-transparent p-1.5 text-[0.85rem] font-bold text-slate-600 cursor-pointer rounded-sm hover:text-slate-900",
+                  p === depositPage ? "border-[1.5px] border-slate-500 text-slate-700" : "border-none"
+                )}
                 onClick={() => setDepositPage(p)}
               >
                 {p}
               </button>
             ))}
             <button
-              className="dds-page-btn"
+              className="bg-transparent border-none p-1.5 text-[0.85rem] font-bold text-slate-600 cursor-pointer rounded-sm hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
               disabled={depositPage === totalDepositPages}
               onClick={() => setDepositPage((p) => Math.min(totalDepositPages, p + 1))}
             >
@@ -181,60 +199,61 @@ export const AccountsSelection: React.FC<AccountsSelectionProps> = ({
             LEASING FACILITIES (only for with-facility)
         ══════════════════════════════════════════ */}
         {visibleLeasing.length > 0 && (
-          <div className="dds-section">
-            <div className="dds-section-title">Leasing Facilities</div>
+          <div className="mb-9">
+            <div className="text-lg font-semibold text-slate-900 mb-3">Leasing Facilities</div>
 
-            <div className="dds-table-wrapper">
-              <table className="dds-table">
-                <thead>
-                  <tr>
-                    <th rowSpan={2}>Type of<br />Facilities</th>
-                    <th rowSpan={2}>Loan<br />Number</th>
-                    <th rowSpan={2}>Currency<br />Type</th>
-                    <th rowSpan={2}>
+            <div className="overflow-x-auto border border-slate-200 rounded">
+              <Table className="text-[0.85rem]">
+                <TableHeader className="bg-slate-50">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead rowSpan={2} className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Type of<br />Facilities</TableHead>
+                    <TableHead rowSpan={2} className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Loan<br />Number</TableHead>
+                    <TableHead rowSpan={2} className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Currency<br />Type</TableHead>
+                    <TableHead rowSpan={2} className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">
                       Capital Outstanding<br />
-                      <span className="dds-th-sub">as at DD/MM/YYYY</span>
-                    </th>
-                    <th colSpan={3} style={{ textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>
+                      <span className="text-xs font-normal text-slate-500 block mt-0.5">as at DD/MM/YYYY</span>
+                    </TableHead>
+                    <TableHead colSpan={3} className="text-center border-b border-slate-200 font-semibold text-slate-700 border-r border-slate-200">
                       Recoveries during the period<br />
-                      <span className="dds-th-sub">(From DD/MM/YYYY to DD/MM/YYYY)</span>
-                    </th>
-                    <th rowSpan={2} style={{ width: '36px' }}></th>
-                  </tr>
-                  <tr>
-                    <th>Capital</th>
-                    <th>Interest</th>
-                    <th style={{ borderRight: '1px solid #e2e8f0' }}>Late Fee</th>
-                  </tr>
-                </thead>
-                <tbody>
+                      <span className="text-xs font-normal text-slate-500 block mt-0.5">(From DD/MM/YYYY to DD/MM/YYYY)</span>
+                    </TableHead>
+                    <TableHead rowSpan={2} className="w-9" />
+                  </TableRow>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Capital</TableHead>
+                    <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Interest</TableHead>
+                    <TableHead className="font-semibold text-slate-700 align-bottom whitespace-nowrap border-r border-slate-200">Late Fee</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {pagedLeasing.map((fac) => (
-                    <tr key={fac.id} className={selectedAccounts.includes(fac.id) ? 'dds-row-selected' : ''}>
-                      <td className="dds-td-link">{fac.typeOfFacilities}</td>
-                      <td>{fac.loanNumber}</td>
-                      <td>{fac.currencyType}</td>
-                      <td className="dds-td-num">{fac.capitalOutstanding}</td>
-                      <td className="dds-td-num">{fac.recoveriesCapital}</td>
-                      <td className="dds-td-num">{fac.recoveriesInterest}</td>
-                      <td className="dds-td-num">{fac.recoveriesLateFee}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <input
-                          type="checkbox"
-                          className="dds-checkbox"
-                          checked={selectedAccounts.includes(fac.id)}
-                          onChange={() => onToggleAccount(fac.id)}
-                        />
-                      </td>
-                    </tr>
+                    <TableRow key={fac.id} className={cn("hover:bg-slate-100 transition-colors", selectedAccounts.includes(fac.id) && "bg-blue-50")}>
+                      <TableCell className="text-sky-600 font-medium cursor-pointer hover:underline border-r border-slate-200">{fac.typeOfFacilities}</TableCell>
+                      <TableCell className="border-r border-slate-200">{fac.loanNumber}</TableCell>
+                      <TableCell className="border-r border-slate-200">{fac.currencyType}</TableCell>
+                      <TableCell className="text-right tabular-nums border-r border-slate-200">{fac.capitalOutstanding}</TableCell>
+                      <TableCell className="text-right tabular-nums border-r border-slate-200">{fac.recoveriesCapital}</TableCell>
+                      <TableCell className="text-right tabular-nums border-r border-slate-200">{fac.recoveriesInterest}</TableCell>
+                      <TableCell className="text-right tabular-nums border-r border-slate-200">{fac.recoveriesLateFee}</TableCell>
+                      <TableCell className="text-center p-0 align-middle">
+                        <div className="flex justify-center h-full items-center">
+                          <Checkbox
+                            checked={selectedAccounts.includes(fac.id)}
+                            onCheckedChange={() => onToggleAccount(fac.id)}
+                            className="data-[state=checked]:bg-[#2b3b7e] data-[state=checked]:border-[#2b3b7e]"
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
 
             {/* Pagination */}
-            <div className="dds-pagination">
+            <div className="flex items-center justify-end gap-2 mt-3 pr-3">
               <button
-                className="dds-page-btn"
+                className="bg-transparent border-none p-1.5 text-[0.85rem] font-bold text-slate-600 cursor-pointer rounded-sm hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
                 disabled={leasingPage === 1}
                 onClick={() => setLeasingPage((p) => Math.max(1, p - 1))}
               >
@@ -243,14 +262,17 @@ export const AccountsSelection: React.FC<AccountsSelectionProps> = ({
               {Array.from({ length: totalLeasingPages }, (_, i) => i + 1).map((p) => (
                 <button
                   key={p}
-                  className={`dds-page-btn ${p === leasingPage ? 'dds-page-btn-active' : ''}`}
+                  className={cn(
+                    "bg-transparent p-1.5 text-[0.85rem] font-bold text-slate-600 cursor-pointer rounded-sm hover:text-slate-900",
+                    p === leasingPage ? "border-[1.5px] border-slate-500 text-slate-700" : "border-none"
+                  )}
                   onClick={() => setLeasingPage(p)}
                 >
                   {p}
                 </button>
               ))}
               <button
-                className="dds-page-btn"
+                className="bg-transparent border-none p-1.5 text-[0.85rem] font-bold text-slate-600 cursor-pointer rounded-sm hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
                 disabled={leasingPage === totalLeasingPages}
                 onClick={() => setLeasingPage((p) => Math.min(totalLeasingPages, p + 1))}
               >
@@ -261,24 +283,23 @@ export const AccountsSelection: React.FC<AccountsSelectionProps> = ({
         )}
 
         {/* Navigation */}
-        <div className="wizard-actions" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '24px', marginTop: '8px' }}>
-          <div className="button-group">
-            <button className="btn-secondary" onClick={onBack}>Previous</button>
-            <button
-              className="btn-primary"
+        <div className="flex justify-end border-t border-slate-100 pt-6 mt-2">
+          <div className="flex gap-3 w-full justify-between">
+            <Button variant="outline" onClick={onBack}>Previous</Button>
+            <Button
               disabled={!isValid}
               onClick={onNext}
             >
               Next Step
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />
               </svg>
-            </button>
+            </Button>
           </div>
         </div>
 
       </div>
-    </div>
+    </Card>
   );
 };
